@@ -7,7 +7,6 @@ provider "azurerm" {
   features {}
 }
 
-
 resource "azurerm_resource_group" "vyatr" {
   name     = "vyatr"
   location = "uksouth"
@@ -19,7 +18,7 @@ variable "prefix" {
 
 resource "azurerm_virtual_network" "main" {
   name                = "${var.prefix}-network"
-  address_space       = ["10.0.0.0/26"]
+  address_space       = ["10.0.0.0/25"]
   location            = azurerm_resource_group.vyatr.location
   resource_group_name = azurerm_resource_group.vyatr.name
 }
@@ -28,7 +27,7 @@ resource "azurerm_subnet" "internal" {
   name                 = "internal"
   resource_group_name  = azurerm_resource_group.vyatr.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefix       = "10.0.2.0/24"
+  address_prefix       = "10.0.0.0/26"
 }
 
 resource "azurerm_public_ip" "perforce_server_ip" {
@@ -72,7 +71,7 @@ resource "azurerm_virtual_machine" "main" {
     version   = "latest"
   }
   storage_os_disk {
-    name              = "vyatrosdisk1"
+    name              = "vyatr-os-disk1"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
