@@ -16,6 +16,11 @@ variable "prefix" {
   default = "vyatr"
 }
 
+variable "provisioner_script" {
+  default     = "p4d-setup.sh"
+  description = "The script that runs when the VM is created"
+}
+
 resource "azurerm_virtual_network" "main" {
   name                = "${var.prefix}-network"
   address_space       = ["10.0.0.0/25"]
@@ -90,5 +95,18 @@ resource "azurerm_virtual_machine" "main" {
   }
   tags = {
     owner = "Vlady Veselinov"
+  }
+
+
+  provisioner "file" {
+    source      = var.provisioner_script
+    destination = "/tmp/${var.provisioner_script}"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /tmp/${var.provisioner_script}",
+      "/tmp/${var.provisioner_script} ${p4_service_name} ${azurerm_public_ip.perforce_server_ip.ip_address} ${var.p4_root_directory} ${var.p4_username} ${var.p4_password}",
+    ]
   }
 }
